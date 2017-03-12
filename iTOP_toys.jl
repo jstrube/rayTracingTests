@@ -23,10 +23,10 @@ regions = Array{Region}(0)
 
 # the normals point outwards, so the -1 means that we're interested in the
 # half-region that points away from the normal, i.e. the inside of the plane
-push!(regions, Region(top, -1))
-push!(regions, Region(bot, -1))
 push!(regions, Region(left, -1))
 push!(regions, Region(right, -1))
+push!(regions, Region(top, -1))
+push!(regions, Region(bot, -1))
 push!(regions, Region(front, -1))
 push!(regions, Region(back, -1))
 ex = :(1 ^ 2 ^ 3 ^ 4 ^ 5 ^ 6)
@@ -37,15 +37,16 @@ bounding_box = Box(Coord(-dX, -dY, -dZ), Coord(dX, dY, dZ))
 geometry = Geometry(cells, bounding_box)
 #plot_cell_2D(geometry, Box(Coord(-dX, -dY, 0), Coord(dX, dY, 0)), 1000, 2)
 
-for x in 1:10000
+for x in 1:10
     ray = generate_random_ray(geometry.bounding_box)
     # Perform a single step of ray tracing on the geometry
     new_ray, id, boundary_type = find_intersection(ray, geometry)
     # Compute distance travelled by the ray
     distance = magnitude( new_ray.origin - ray.origin )
-    while boundary_type != "transmission"
+# PMTs are in plane 1
+    while id != 1
         distance += magnitude( new_ray.origin - ray.origin )
         new_ray, id, boundary_type = find_intersection(new_ray, geometry)
     end
-    println("Ray moved ", distance, " [cm] before hitting a ", boundary_type, " boundary")
+    println("Ray moved ", distance, " [cm] before hitting a ", boundary_type, " boundary(", id, ") at ", new_ray.origin)
 end
